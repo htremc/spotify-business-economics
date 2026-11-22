@@ -319,6 +319,14 @@ body.idle #nav,body.idle #hint{opacity:0;pointer-events:none}
 #idx .it:hover,#idx .it.cur{background:rgba(30,215,96,.16);border-color:rgba(30,215,96,.55)}
 #idx .it b{font-family:var(--f-display);font-size:.85em;color:var(--green);min-width:2ch}
 .dia-m{display:none}
+body.shot #nav,body.shot #hint,body.shot #notes,body.shot #prog{display:none!important}
+.tbl.t16 .row,.tbl.t16 .hd{grid-template-columns:200px 1fr 420px 150px}
+.tbl.t16 .row>div:first-child{font-family:var(--f-display);font-weight:800;color:var(--c2)}
+#notes{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;width:min(1120px,92vw);max-height:48vh;overflow:auto;padding:18px 24px 20px;border-radius:20px;background:rgba(6,16,11,.95);border:1px solid var(--line);font-size:clamp(15px,1.45vw,21px);line-height:1.5;display:none;z-index:25;box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
+#notes.open{display:block}
+#notes .nh{font-size:.72em;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+#notes .nh b{color:var(--green)}#notes .nh span{color:var(--mint)}
+#notes p{margin:0}#notes .muted{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.slide.active [data-in],.slide.active .gy,.slide.active .gx,.slide.active .dr{animation:none}.slide.enter,.slide.leave{transform:none!important}.tilt{transition:none}}
 
 /* ================= MOBILE / PORTRAIT: one column per slide, vertical scroll, swipe to change slide ================= */
@@ -798,6 +806,23 @@ body.idle #nav,body.idle #hint{opacity:0;pointer-events:none}
   <div class="pn">15</div>
 </section>
 
+<!-- 16 · appendix (task division): hidden in the live deck, rendered only for the PPTX handed in -->
+<section class="slide s16" id="s16" data-t="0" data-extra hidden aria-label="Appendix">
+  <div class="head"><div class="eyebrow" data-in>APPENDIX · TASK DIVISION</div><h2 class="t" data-in>Who speaks when</h2></div>
+  <div class="body" style="top:226px"><div class="tbl t16">
+    <div class="hd" data-in><div class="th">Slides</div><div class="th">Section</div><div class="th">Speaker</div><div class="th">Time</div></div>
+    <div class="row" data-in data-z="30"><div>1–2</div><div>Opening</div><div>Álvaro Medrano</div><div>1 min</div></div>
+    <div class="row" data-in data-z="30"><div>3–4</div><div>Topic 1: Identity</div><div>Álvaro Antón</div><div>2 min</div></div>
+    <div class="row" data-in data-z="30"><div>5</div><div>Topic 2: Theory</div><div>Bruno Bardenheuer</div><div>1 min</div></div>
+    <div class="row" data-in data-z="30"><div>6–8</div><div>Topic 3: Planning, decisions, structure</div><div>Carmelo Vadillo</div><div>3 min</div></div>
+    <div class="row" data-in data-z="30"><div>9–10</div><div>Topic 4: Leadership, motivation, control</div><div>Rafael Cavestany</div><div>2 min</div></div>
+    <div class="row" data-in data-z="30"><div>11–12</div><div>Topic 5: Environment</div><div>Héctor Escobar</div><div>2 min</div></div>
+    <div class="row" data-in data-z="30"><div>13–15</div><div>Conclusion and questions</div><div>Bruno Bardenheuer</div><div>1 min</div></div>
+  </div></div>
+  <div class="src" style="font-size:19px">Each speaker has one block of slides, and the whole talk takes about 12 minutes. · Interactive version: https://htremc.github.io/spotify-business-economics/</div>
+  <div class="pn">16</div>
+</section>
+
 </div></div>
 
 <div id="nav" role="toolbar" aria-label="Slide navigation">
@@ -805,7 +830,8 @@ body.idle #nav,body.idle #hint{opacity:0;pointer-events:none}
   <button id="ct" class="ct" aria-label="Open slide index">01 / 15</button>
   <button id="next" aria-label="Next slide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4l6 6-6 6"/></svg></button>
 </div>
-<div id="hint"><kbd>←</kbd><kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>G</kbd> index · <kbd>Q</kbd> lite 3D</div>
+<div id="hint"><kbd>←</kbd><kbd>→</kbd> navigate · <kbd>F</kbd> fullscreen · <kbd>G</kbd> index · <kbd>N</kbd> script · <kbd>Q</kbd> lite 3D</div>
+<div id="notes" aria-label="Speaker script"></div>
 <div id="idx" role="dialog" aria-label="Slide index"><div class="grid"></div></div>
 
 <script>console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation' );
@@ -821,7 +847,53 @@ body.idle #nav,body.idle #hint{opacity:0;pointer-events:none}
 'use strict';
 var $=function(s,e){return (e||document).querySelector(s)}, $$=function(s,e){return Array.prototype.slice.call((e||document).querySelectorAll(s))};
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-var slides=$$('.slide'), N=slides.length, cur=0, swapTimer=0, activePl=null, busyUntil=0, transT=0, hotEl=null;
+var SHOT=/[?&]shot/.test(location.search); if(SHOT){document.body.classList.add('shot');$$('.slide[data-extra]').forEach(function(s){s.hidden=false})}
+var NOTES={
+  "who": [
+    {"slides": "1–2", "section": "Opening", "speaker": "Álvaro Medrano", "time": "1 min"},
+    {"slides": "3–4", "section": "Topic 1: Identity", "speaker": "Álvaro Antón", "time": "2 min"},
+    {"slides": "5", "section": "Topic 2: Theory", "speaker": "Bruno Bardenheuer", "time": "1 min"},
+    {"slides": "6–8", "section": "Topic 3: Planning, decisions, structure", "speaker": "Carmelo Vadillo", "time": "3 min"},
+    {"slides": "9–10", "section": "Topic 4: Leadership, motivation, control", "speaker": "Rafael Cavestany", "time": "2 min"},
+    {"slides": "11–12", "section": "Topic 5: Environment", "speaker": "Héctor Escobar", "time": "2 min"},
+    {"slides": "13–15", "section": "Conclusion and questions", "speaker": "Bruno Bardenheuer", "time": "1 min"}
+  ],
+  "intro": "Each speaker has one block of slides, and the whole talk takes about 12 minutes. The slides show the visuals and the script explains them. Read the critical judgement in the dark box at the bottom word for word.",
+  "speakers": {
+    "1": "Álvaro Medrano", "2": "Álvaro Medrano",
+    "3": "Álvaro Antón", "4": "Álvaro Antón",
+    "5": "Bruno Bardenheuer",
+    "6": "Carmelo Vadillo", "7": "Carmelo Vadillo", "8": "Carmelo Vadillo",
+    "9": "Rafael Cavestany", "10": "Rafael Cavestany",
+    "11": "Héctor Escobar", "12": "Héctor Escobar",
+    "13": "Bruno Bardenheuer", "14": "Bruno Bardenheuer", "15": "Bruno Bardenheuer"
+  },
+  "titles": {
+    "1": "Title", "2": "Roadmap", "3": "Spotify at a glance", "4": "Management profile", "5": "Theory matrix",
+    "6": "Planning", "7": "Decisions", "8": "Structure", "9": "Leadership and motivation", "10": "Control dashboard",
+    "11": "General environment", "12": "Competitive arena", "13": "Conclusion", "14": "References (1 of 2)", "15": "References (2 of 2)"
+  },
+  "notes": {
+    "1": "\"Good morning. We are Álvaro Medrano, Álvaro Antón, Bruno Bardenheuer, Carmelo Vadillo, Rafael Cavestany and Héctor Escobar. Today we analyse how Spotify is managed, a company used by 788 million people every month.\"",
+    "2": "\"We look at Spotify through the five topics of the course. For every topic we compare what Spotify says with independent evidence, and we close with a critical judgement. Álvaro Antón starts.\"",
+    "3": "\"Spotify was founded in Stockholm in 2006 and has been listed in New York since 2018. In the third quarter of 2026 it had 788 million users, 306 million of them paying, and almost 5 billion euros in revenue. The green bar shows the freemium model: 90% of revenue comes from Premium and only 10% from ads.\"",
+    "4": "\"Spotify is still founder-led. Daniel Ek is Executive Chairman and owns strategy, and since 2026 two co-CEOs run the business side and the product side. The mission has not changed, but the values have moved from 'playful' to three execution values: One Team, Human Judgment and Make It Happen.\n\nOur judgement: values moved from playful to execution, but power still centres on the founder. Bruno, over to you.\"",
+    "5": "\"This matrix tests six classic theories against Spotify. Four fit well: Mayo's human relations, through Work From Anywhere; open systems, because Spotify depends on music bought from the industry; contingency, through flexible squads; and Mintzberg's roles, with Ek as leader and resource allocator. Weber's bureaucracy fits poorly because the squads are autonomous. Taylor fits only partly, through the efficiency cut of 2023.\n\nOur judgement: autonomy is the default, but in a crisis, as in 2023, Taylor-style efficiency wins. Carmelo, over to you.\"",
+    "6": "\"Planning works on three levels. The chairman sets the strategy, and 2026 is the 'Year of Raising Ambition'. The co-CEOs set product bets, such as expanding audiobooks from 22 to more than 180 markets. Every quarter Spotify publishes public targets. The table shows that at the end of 2025 it met or beat every target.\"",
+    "7": "\"Here are two big decisions with different logics. On the left, in December 2023 Spotify chose one big layoff of about 1,500 roles instead of small cuts over time. That was a non-programmed decision, and 2024 became its first full profitable year. Analysts warned, however, that it did not fix the revenue problems. On the right, US prices rose step by step from 9.99 to 12.99 dollars. That is an incremental decision, and revenue per user grew 9.3%.\"",
+    "8": "\"This is the famous Spotify model. Squads are small teams and tribes group several squads. Chapters, the coloured rows, connect people with the same skill. Guilds are open communities. Above them sits a formal top: the chairman and two co-CEOs. Spotify says squads choose how they work, but the evidence shows the model described its early years, not a fixed framework.\n\nOur judgement: the Spotify model is a culture story, and key decisions are still made at the top. Rafael, over to you.\"",
+    "9": "\"Ek leads as a founder with a vision, which Bass calls transformational leadership. He can also be very directive: he announced the 2023 layoffs himself. To motivate staff, Spotify relies on autonomy. People have been able to work from anywhere since 2021, with in-person 'core weeks'. Spotify says staff turnover fell 15% after this policy. But that figure is self-reported, and the same staff went through three layoff rounds in 2023.\"",
+    "10": "\"These six tiles are the KPIs Spotify reports every quarter. Five are growing and only free cash flow is down. The chart shows that users keep rising. Control works as a loop: Spotify sets targets, tracks the KPIs, and corrects course with measures such as cost cuts or price rises.\n\nOur judgement: control is built for investors, because artist pay and staff outcomes are not on the dashboard. Héctor, over to you.\"",
+    "11": "\"Four forces shape Spotify:\n• Political. After Spotify complained, the EU fined Apple 1.8 billion euros.\n• Economic. Spotify can raise prices and still gain subscribers.\n• Social. Some artists left in protest at Ek's investment in defence AI.\n• Technological. AI floods the platform, and Spotify removed more than 75 million spam tracks.\nOn the right you can see that Spotify is number one, with 31.4% of the world's 921.6 million music subscribers.\"",
+    "12": "\"Spotify has more than double the share of the next rival, Tencent. Below that, YouTube is growing and Apple is falling. On the right are the stakeholders: labels and artists, who receive over 11 billion dollars a year; Apple's App Store as a gatekeeper; and customers, who keep joining despite higher prices.\n\nOur judgement: Spotify's main risk is dependence on labels and app stores, not its rivals. Bruno will close.\"",
+    "13": "\"To sum up, three ideas. First, Spotify performs: it beats its targets and has been profitable in 2024 and 2025. Second, teams have freedom, but the big decisions are made at the top. Third, labels and app stores matter more to Spotify than its rivals do.\n\nOur overall judgement: Spotify is well managed for investors, and its next test is artists and employees.\""
+  }
+}
+, notesEl=document.getElementById('notes');
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function showNotes(){ if(!NOTES||!notesEl)return; var k=String(cur+1), t=NOTES.notes[k], sp=NOTES.speakers[k];
+  notesEl.innerHTML='<div class="nh"><b>Slide '+k+'</b>'+(NOTES.titles[k]?' · '+esc(NOTES.titles[k]):'')+(sp?' · <span>'+esc(sp)+'</span>':'')+'</div>'+(t?'<p>'+esc(t).replace(/\n/g,'<br>')+'</p>':'<p class="muted">References (APA 7th edition) · questions</p>')}
+var slides=$$('.slide').filter(function(s){return SHOT||!s.hasAttribute('data-extra')}), N=slides.length, cur=0, swapTimer=0, activePl=null, busyUntil=0, transT=0, hotEl=null;
 var scaler=$('#scaler'), prog=$('#prog'), ctEl=$('#ct'), idx=$('#idx');
 var HUES=['#1ED760','#8E6BFF','#FF4D9D','#FFB93B','#3AD8FF','#1ED760','#7FB898'];
 var TOPIC=[0,0,0,0,1,2,2,2,3,3,4,4,0,6,6]; /* hue index per slide */
@@ -880,7 +952,7 @@ function go(n,dir){
 function syncUI(){
   ctEl.textContent=String(cur+1).padStart(2,'0')+' / '+N;
   prog.style.width=((cur+1)/N*100)+'%';
-  prog.style.setProperty('--pc',HUES[HUEIDX[cur]]);
+  prog.style.setProperty('--pc',HUES[HUEIDX[cur]]); showNotes();
   try{history.replaceState(null,'','#s'+(cur+1))}catch(e){try{location.hash='s'+(cur+1)}catch(_){}}
 }
 function next(){go(cur+1,1)} function prev(){go(cur-1,-1)}
@@ -894,6 +966,7 @@ addEventListener('keydown',function(e){
   else if(k==='Home'){go(0,-1)} else if(k==='End'){go(N-1,1)}
   else if(k==='f'||k==='F'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(_){}}
   else if(k==='g'||k==='G'){openIdx()}
+  else if(k==='n'||k==='N'){if(notesEl){notesEl.classList.toggle('open');showNotes()}}
   else if(k==='q'||k==='Q'){if(scene){var lite=scene.toggleLite();hint.textContent=lite?'Lite mode ON (lighter 3D)':'Lite mode OFF (full 3D)';hint.style.opacity='1';clearTimeout(hintT);hintT=setTimeout(function(){hint.style.opacity='0'},2200)}}
 });
 addEventListener('hashchange',function(){var m=/^#s(\d+)$/.exec(location.hash);if(m){var n=+m[1]-1;if(n>=0&&n<N&&n!==cur)go(n)}});
@@ -989,7 +1062,7 @@ try{
   }
   var rn=''; try{var gl0=renderer.getContext(),ext=gl0.getExtension('WEBGL_debug_renderer_info');rn=ext?String(gl0.getParameter(ext.UNMASKED_RENDERER_WEBGL)):''}catch(_){}
   var lowEnd=/swiftshader|llvmpipe|software|basic render/i.test(rn)||matchMedia('(pointer:coarse)').matches||(navigator.deviceMemory&&navigator.deviceMemory<=4)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4);
-  if(lowEnd) applyQ(0);
+  if(lowEnd&&!SHOT) applyQ(0);
   function frame(now){
     requestAnimationFrame(frame);
     if(document.hidden){last=now;return}
@@ -997,7 +1070,7 @@ try{
     var dt=Math.min(.05,(now-last)/1000); last=now; var t=(now-T0)/1000;
     ema+=(dt-ema)*.08;
     if(ema>.026){slow++}else if(slow>0){slow--}
-    if(slow>40&&quality>0){slow=0;ema=.016;applyQ(quality-1)}
+    if(slow>40&&quality>0&&!SHOT){slow=0;ema=.016;applyQ(quality-1)}
     var k=1-Math.exp(-dt*(reduce?3:1.8)); var tw=WP[tcur];
     ex.ang+=(tw[0]-ex.ang)*k; ex.rad+=(tw[1]-ex.rad)*k; ex.h+=(tw[2]-ex.h)*k; ex.off+=(tw[3]-ex.off)*k; ex.vs+=(tw[4]-ex.vs)*k; ex.br+=(tw[5]-ex.br)*k; ex.ly+=(tw[6]-ex.ly)*k;
     var drift=reduce?0:Math.sin(t*.12)*.25;
